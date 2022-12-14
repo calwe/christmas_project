@@ -69,7 +69,7 @@ export class Player {
 
     tick() {
         this.vel.add(gravity);
-        this.vel.x *= 1 - friction;
+        this.vel.x *= 1 - (friction * (this.isGrounded() ? 1 : 0.5));
         this.pos.add(this.vel);
 
         this.pos.y = this.p.min(this.pos.y, 400);
@@ -80,28 +80,27 @@ export class Player {
         }
 
         if (this.p.keyIsDown(this.controls.left)) {
-            this.vel.x -= this.speed;
+            this.vel.x -= this.speed * (this.isGrounded() ? 1 : 0.5);
         }
         if (this.p.keyIsDown(this.controls.right)) {
-            this.vel.x += this.speed;
+            this.vel.x += this.speed * (this.isGrounded() ? 1 : 0.5);
         }
-
     }
 
     keyPressed() {
         if (this.p.keyCode === this.controls.up) {
-            console.log("test");
             if (this.jumpCount < maxJumps) {
                 this.vel.y = -jumpForce;
+                this.vel.x *= 0.3;
                 this.jumpCount++;
             }
         }
 
         if (this.p.keyCode === this.controls.lightAttack) {
-            this.lightAttack();
+            this.weapon.lightAttack();
         }
         if (this.p.keyCode === this.controls.heavyAttack) {
-            this.heavyAttack();
+            this.weapon.heavyAttack();
         }
     }
 
@@ -109,7 +108,7 @@ export class Player {
         this.damageTaken += damage;
     }
 
-    knockback(value: number) {
+    knockback(value: number, min: number) {
         const a = 0.003;
         const b = 0.1;
         const c = 3;
@@ -119,14 +118,6 @@ export class Player {
 
         // knockback is calculated using a quadratic function as this that knockback
         // gets exponentially stronger the more damage is taken
-        this.vel.add(diffVector.mult((a * this.damageTaken * this.damageTaken) + (b * value * this.damageTaken) + c));
-    }
-
-    lightAttack() {
-        throw new Error("Method not implemented.");
-    }
-
-    heavyAttack() {
-        throw new Error("Method not implemented.");
+        this.vel.add(diffVector.mult((a * this.damageTaken * this.damageTaken) + (b * value * this.damageTaken) + c + min));
     }
 }

@@ -9,16 +9,4 @@ export class Ulgrim extends Player {
         super(p, speed, player, "#8b4513");
         this.giveWeapon(new Axe(p, this));
     }
-
-    lightAttack() {
-        console.log("Ulgrim light attack");
-        this.enemy.takeDamage(10);
-        this.enemy.knockback(0.01);
-    }
-
-    heavyAttack() {
-        console.log("Ulgrim heavy attack");
-        this.enemy.takeDamage(20);
-        this.enemy.knockback(0.02);
-    }
 }

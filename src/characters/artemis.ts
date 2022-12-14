@@ -9,12 +9,4 @@ export class Artemis extends Player {
         super(p, speed, player, "#483d8b");
         this.giveWeapon(new Lance(p, this));
     }
-
-    lightAttack() {
-        console.log("Artemis light attack");
-    }
-
-    heavyAttack() {
-        console.log("Artemis heavy attack");
-    }
 }

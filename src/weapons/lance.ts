@@ -14,4 +14,13 @@ export class Lance extends Weapon {
         this.p.rect(0, 15, 150, 20);
         this.p.pop();
     }
+
+    lightAttack() {
+        this.user.vel.x += 20 * -this.user.direction;
+        if (this.p.dist(this.user.pos.x, this.user.pos.y, this.user.enemy.pos.x, this.user.enemy.pos.y) < 100) {
+            this.user.enemy.takeDamage(10);
+            this.user.enemy.knockback(0.5, 30);
+            console.log("light attack");
+        }
+    }
 }

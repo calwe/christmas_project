@@ -23,4 +23,12 @@ export class Axe extends Weapon {
 
         this.p.pop();
     }
+
+    lightAttack() {
+        if (this.p.dist(this.user.pos.x, this.user.pos.y, this.user.enemy.pos.x, this.user.enemy.pos.y) < 100) {
+            this.user.enemy.takeDamage(10);
+            this.user.enemy.knockback(0.1, 0);
+            console.log("light attack");
+        }
+    }
 }
