@@ -1,27 +1,44 @@
 import p5, { Vector } from "p5";
 import { Controls } from "./controls";
+import { Weapon } from "./weapon";
 
 const gravity = new Vector(0, 1);
+const friction = 0.25; // 0 to 1
 const jumpForce = 15;
 const maxJumps = 3;
+const speedScalar = 0.5;
 
 export class Player {
     p: p5;
+    direction: number;
     pos: Vector;
     vel: Vector;
     controls: Controls;
     speed: number;
     jumpCount: number;
     color: string;
+    damageTaken: number;
+    public enemy: Player;
+    weapon: Weapon;
 
     constructor(p: p5, speed: number, player: number, color: string) {
         this.p = p;
         this.pos = p.createVector(player === 1 ? 100 : p.width - 100, 100);
         this.vel = p.createVector(0, 0);
+        this.direction = player === 1 ? -1 : 1;
         this.controls = new Controls(player);
-        this.speed = speed;
+        this.speed = speed * speedScalar;
         this.jumpCount = 0;
         this.color = color;
+        this.damageTaken = 0;
+    }
+
+    giveWeapon(weapon: Weapon) {
+        this.weapon = weapon;
+    }
+
+    setEnemy(enemy: Player) {
+        this.enemy = enemy;
     }
 
     // TODO: change to proper collision detection
@@ -30,12 +47,29 @@ export class Player {
     }
 
     render() {
+        this.p.push();
+
+        this.p.translate(this.pos.x, this.pos.y);
+        this.p.scale(this.direction, 1);
+        if (this.p.keyIsDown(this.controls.left)) {
+            this.direction = 1;
+        }
+        if (this.p.keyIsDown(this.controls.right)) {
+            this.direction = -1;
+        }
+
         this.p.fill(this.color);
-        this.p.rect(this.pos.x, this.pos.y, 40, 80);
+        this.p.rectMode(this.p.CENTER);
+        this.p.rect(0, 0, 40, 80);
+        if (this.weapon)
+            this.weapon.render();
+
+        this.p.pop();
     }
 
     tick() {
         this.vel.add(gravity);
+        this.vel.x *= 1 - friction;
         this.pos.add(this.vel);
 
         this.pos.y = this.p.min(this.pos.y, 400);
@@ -45,13 +79,13 @@ export class Player {
             this.jumpCount = 0;
         }
 
-        this.vel.x = 0;
         if (this.p.keyIsDown(this.controls.left)) {
-            this.vel.x = -this.speed;
+            this.vel.x -= this.speed;
         }
         if (this.p.keyIsDown(this.controls.right)) {
-            this.vel.x = this.speed;
+            this.vel.x += this.speed;
         }
+
     }
 
     keyPressed() {
@@ -62,8 +96,37 @@ export class Player {
                 this.jumpCount++;
             }
         }
+
+        if (this.p.keyCode === this.controls.lightAttack) {
+            this.lightAttack();
+        }
+        if (this.p.keyCode === this.controls.heavyAttack) {
+            this.heavyAttack();
+        }
     }
 
-    keyReleased() {
+    takeDamage(damage: number) {
+        this.damageTaken += damage;
+    }
+
+    knockback(value: number) {
+        const a = 0.003;
+        const b = 0.1;
+        const c = 3;
+
+        let diffVector = this.pos.copy().sub(this.enemy.pos);
+        diffVector.normalize();
+
+        // knockback is calculated using a quadratic function as this that knockback
+        // gets exponentially stronger the more damage is taken
+        this.vel.add(diffVector.mult((a * this.damageTaken * this.damageTaken) + (b * value * this.damageTaken) + c));
+    }
+
+    lightAttack() {
+        throw new Error("Method not implemented.");
+    }
+
+    heavyAttack() {
+        throw new Error("Method not implemented.");
     }
 }
